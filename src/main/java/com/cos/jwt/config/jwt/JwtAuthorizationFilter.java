@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.cos.jwt.config.JwtProperties;
 import com.cos.jwt.config.auth.PrincipalDetails;
 import com.cos.jwt.model.User;
 import com.cos.jwt.repository.UserRepository;
@@ -38,20 +39,20 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 		//super.doFilterInternal(request, response, chain); --> 응답 2번하게 됨
 		System.out.println("JwtAuthorizationFilter: 권한이나 인증이 필요한 주소 ");
 		
-		String jwtHeader = request.getHeader("Authorization");
+		String jwtHeader = request.getHeader(JwtProperties.HEADER_STRING);
 		System.out.println("jwtHeader: "+jwtHeader);
 		
 		//JWT 토큰을 검증을 해서 정사억인 사용자인지 확인
-		if(jwtHeader == null || !jwtHeader.startsWith("Bearer")) {
+		if(jwtHeader == null || !jwtHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
 			chain.doFilter(request, response);
 			return;
 		}
 		
 		//JWT토큰 검증을 해서 정상적인 사용자인지 확인 
-		String jwtToken = request.getHeader("Authorization").replace("Bearer ","");
+		String jwtToken = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX,"");
 		
 		String username = 
-				JWT.require(Algorithm.HMAC512("cos")).build().verify(jwtToken).getClaim("username").asString();
+				JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(jwtToken).getClaim("username").asString();
 		
 		//서명이 정상적으로 됨
 		if(username != null) {

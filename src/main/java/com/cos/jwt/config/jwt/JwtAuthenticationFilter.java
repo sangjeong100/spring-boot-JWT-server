@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.cos.jwt.config.JwtProperties;
 import com.cos.jwt.config.auth.PrincipalDetails;
 import com.cos.jwt.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -110,11 +111,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 							.withExpiresAt(new Timestamp(System.currentTimeMillis() + (60000*100))) // 1/1000 s
 							.withClaim("id",principalDetails.getUser().getId()) // 비공개 클레임
 							.withClaim("username", principalDetails.getUser().getUsername())
-							.sign(Algorithm.HMAC512("cos"));
+							.sign(Algorithm.HMAC512(JwtProperties.SECRET));
 		
 		System.out.println("jwtToken : "+jwtToken);
 		
-		response.addHeader("Authorization", "Bearer " + jwtToken);
+		response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
 		
 		// TODO Auto-generated method stub
 		//super.successfulAuthentication(request, response, chain, authResult);
